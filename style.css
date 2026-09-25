@@ -257,4 +257,149 @@ tr:hover {
         margin-top: 5px;
     }
 }
+/* ===============================
+   BOTÓN CAMBIAR TEMA
+   =============================== */
 
+#botonTema {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+
+    width: 45px;
+    height: 45px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: white;
+    color: #333;
+
+    font-size: 22px;
+
+    cursor: pointer;
+
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: transform 0.2s ease;
+}
+
+#botonTema:hover {
+    transform: scale(1.08);
+}
+
+/* ===============================
+   MODO OSCURO
+   =============================== */
+
+body.modo-oscuro {
+    background: #121212;
+    color: #eeeeee;
+}
+
+
+/* TÍTULO */
+
+body.modo-oscuro h1 {
+    color: #ffffff;
+}
+
+
+/* FORMULARIO */
+
+body.modo-oscuro .formulario {
+    background: #1e1e1e;
+}
+
+body.modo-oscuro .campo label {
+    color: #ffffff;
+}
+
+
+/* INPUTS */
+
+body.modo-oscuro .campo input {
+    background: #2a2a2a;
+    color: #ffffff;
+    border-color: #555;
+}
+
+body.modo-oscuro .campo input::placeholder {
+    color: #aaaaaa;
+}
+
+
+/* TARJETAS */
+
+body.modo-oscuro .tarjeta {
+    background: #1e1e1e;
+}
+
+body.modo-oscuro .tarjeta h3 {
+    color: #cccccc;
+}
+
+body.modo-oscuro .tarjeta p {
+    color: #ffffff;
+}
+
+
+/* FILTRO */
+
+body.modo-oscuro .filtro {
+    background: #1e1e1e;
+}
+
+body.modo-oscuro .filtro label {
+    color: #ffffff;
+}
+
+body.modo-oscuro .filtro select {
+    background: #2a2a2a;
+    color: #ffffff;
+    border-color: #555;
+}
+
+
+/* TABLA */
+
+body.modo-oscuro .tabla-contenedor {
+    background: #1e1e1e;
+}
+
+body.modo-oscuro table {
+    color: #ffffff;
+}
+
+body.modo-oscuro th {
+    background: #292929;
+    color: #ffffff;
+}
+
+body.modo-oscuro td {
+    color: #ffffff;
+    border-bottom-color: #444;
+}
+
+body.modo-oscuro tr:hover {
+    background: #252525;
+}
+
+
+/* MENSAJE */
+
+body.modo-oscuro #mensaje {
+    color: #ffffff;
+}
+
+
+/* BOTÓN DEL TEMA */
+
+body.modo-oscuro #botonTema {
+    background: #2a2a2a;
+    color: #ffffff;
+}
