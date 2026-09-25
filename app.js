@@ -1247,3 +1247,88 @@ botonExcel.addEventListener("click", function () {
     );
 
 });
+
+// ===============================
+// MODO OSCURO / MODO CLARO
+// ===============================
+
+const botonTema =
+    document.getElementById("botonTema");
+
+
+// ===============================
+// APLICAR TEMA
+// ===============================
+
+function aplicarTema(tema) {
+
+    if (tema === "oscuro") {
+
+        document.body.classList.add("modo-oscuro");
+
+        botonTema.textContent = "☀️";
+
+    } else {
+
+        document.body.classList.remove("modo-oscuro");
+
+        botonTema.textContent = "🌙";
+
+    }
+
+}
+
+
+// ===============================
+// CAMBIAR TEMA
+// ===============================
+
+botonTema.addEventListener(
+    "click",
+    function () {
+
+        const modoOscuro =
+            document.body.classList.contains(
+                "modo-oscuro"
+            );
+
+        if (modoOscuro) {
+
+            aplicarTema("claro");
+
+            localStorage.setItem(
+                "tema",
+                "claro"
+            );
+
+        } else {
+
+            aplicarTema("oscuro");
+
+            localStorage.setItem(
+                "tema",
+                "oscuro"
+            );
+
+        }
+
+    }
+);
+
+
+// ===============================
+// RECUPERAR TEMA
+// ===============================
+
+const temaGuardado =
+    localStorage.getItem("tema");
+
+if (temaGuardado === "oscuro") {
+
+    aplicarTema("oscuro");
+
+} else {
+
+    aplicarTema("claro");
+
+}
