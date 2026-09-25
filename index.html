@@ -1,0 +1,233 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mis Horas de Trabajo</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+    <div class="contenedor">
+
+        <h1>📋 Mis Horas de Trabajo</h1>
+
+
+        <!-- FORMULARIO -->
+
+        <div class="formulario">
+
+            <div class="campo">
+
+                <label for="fecha">
+                    Fecha
+                </label>
+
+                <input
+                    type="date"
+                    id="fecha"
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="horas">
+                    Horas trabajadas
+                </label>
+
+                <input
+                    type="text"
+                    id="horas"
+                    placeholder="Ej: 8:30"
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="pago">
+                    Pago por hora (€)
+                </label>
+
+                <input
+                    type="number"
+                    id="pago"
+                    step="0.01"
+                    min="0"
+                    placeholder="Ej: 10"
+                >
+
+            </div>
+
+
+            <button id="botonAgregar">
+                ➕ Agregar
+            </button>
+
+        </div>
+
+
+        <div id="mensaje"></div>
+
+
+        <button id="botonCopia">
+            💾 Descargar copia de seguridad
+        </button>
+
+
+        <input
+            type="file"
+            id="archivoRestaurar"
+            accept=".json"
+            style="display: none;"
+        >
+
+
+        <button id="botonRestaurar">
+            📂 Restaurar copia
+        </button>
+
+
+        <button id="botonExcel">
+            📊 Exportar a Excel
+        </button>
+
+
+        <!-- RESUMEN -->
+
+        <div class="resumen">
+
+            <div class="tarjeta">
+
+                <h3>
+                    ⏱️ Horas trabajadas
+                </h3>
+
+                <p id="totalHoras">
+                    0:00
+                </p>
+
+            </div>
+
+
+            <div class="tarjeta">
+
+                <h3>
+                    💰 Dinero ganado
+                </h3>
+
+                <p>
+
+                    <span id="totalGeneral">
+                        0.00
+                    </span> €
+
+                </p>
+
+            </div>
+
+
+            <div class="tarjeta">
+
+                <h3>
+                    📅 Días trabajados
+                </h3>
+
+                <p id="totalDias">
+                    0
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- FILTRO -->
+
+        <div class="filtro">
+
+            <label for="filtroMes">
+                📅 Mostrar mes:
+            </label>
+
+            <select id="filtroMes">
+
+                <option value="todos">
+                    Todos los meses
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- TABLA -->
+
+        <div class="tabla-contenedor">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Día
+                        </th>
+
+                        <th>
+                            Fecha
+                        </th>
+
+                        <th>
+                            Horas
+                        </th>
+
+                        <th>
+                            Pago/hora
+                        </th>
+
+                        <th>
+                            Total
+                        </th>
+
+                        <th>
+                            Acciones
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="tablaRegistros">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>
+```
