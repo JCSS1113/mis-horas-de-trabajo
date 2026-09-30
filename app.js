@@ -1,1334 +1,712 @@
+// ================================
+// MIS HORAS DE TRABAJO - APP COMPLETA
+// ================================
+//
+// ÍNDICE:
+//   1. Utilidades (conversión de horas, fechas, etc.)
+//   2. Sistema de modales (reemplaza alert/confirm)
+//   3. Estado y elementos del DOM
+//   4. Tabla de registros
+//   5. Formulario (agregar/editar)
+//   6. Entrada/Salida (reloj)
+//   7. Filtro por mes
+//   8. Copia de seguridad (exportar/importar)
+//   9. Exportar a Excel
+//  10. Modo oscuro/claro
+//  11. Inicialización
+//
+// ================================
+
+
+// ================================
+// 1. UTILIDADES
+// ================================
+
+const Utilidades = {
+    convertirHoras(horasTexto) {
+        horasTexto = String(horasTexto).trim();
+
+        if (horasTexto.includes(":")) {
+            const partes = horasTexto.split(":");
+            if (partes.length !== 2) return NaN;
+
+            const horas = Number(partes[0]);
+            const minutos = Number(partes[1]);
+
+            if (isNaN(horas) || isNaN(minutos)) return NaN;
+            if (horas < 0) return NaN;
+            if (minutos < 0 || minutos >= 60) return NaN;
+
+            return horas + (minutos / 60);
+        }
+
+        const horas = Number(horasTexto);
+        if (isNaN(horas) || horas < 0) return NaN;
+        return horas;
+    },
+
+    convertirAMinutos(horasTexto) {
+        const horas = this.convertirHoras(horasTexto);
+        if (isNaN(horas)) return NaN;
+        return Math.round(horas * 60);
+    },
+
+    formatoHoras(minutos) {
+        const horas = Math.floor(minutos / 60);
+        const minutosRestantes = minutos % 60;
+        return horas + ":" + String(minutosRestantes).padStart(2, "0");
+    },
+
+    obtenerNombreDia(fecha) {
+        const partes = fecha.split("-");
+        const fechaObjeto = new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
+        const nombresDias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+        return nombresDias[fechaObjeto.getDay()];
+    },
+
+    fechaValida(fecha) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return false;
+        const partes = fecha.split("-");
+        const año = Number(partes[0]);
+        const mes = Number(partes[1]);
+        const dia = Number(partes[2]);
+        const fechaObjeto = new Date(año, mes - 1, dia);
+        return fechaObjeto.getFullYear() === año && fechaObjeto.getMonth() === mes - 1 && fechaObjeto.getDate() === dia;
+    },
+
+    localStorageDisponible() {
+        try {
+            const test = "__test__";
+            localStorage.setItem(test, test);
+            localStorage.removeItem(test);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+};
+
+
+// ================================
+// 2. SISTEMA DE MODALES
+// ================================
+
+const Modal = {
+    contenedor: null,
+    modal: null,
+    titulo: null,
+    mensaje: null,
+    input: null,
+    botonAceptar: null,
+    botonCancelar: null,
+    callbackAceptar: null,
+    callbackCancelar: null,
+
+    init() {
+        this.contenedor = document.createElement("div");
+        this.contenedor.className = "modal-overlay";
+        this.contenedor.style.display = "none";
+
+        this.modal = document.createElement("div");
+        this.modal.className = "modal";
+
+        this.titulo = document.createElement("h3");
+        this.titulo.className = "modal-titulo";
+
+        this.mensaje = document.createElement("p");
+        this.mensaje.className = "modal-mensaje";
+
+        this.input = document.createElement("input");
+        this.input.className = "modal-input";
+        this.input.type = "text";
+        this.input.style.display = "none";
+
+        const botones = document.createElement("div");
+        botones.className = "modal-botones";
+
+        this.botonCancelar = document.createElement("button");
+        this.botonCancelar.className = "modal-boton modal-boton-cancelar";
+        this.botonCancelar.textContent = "Cancelar";
+        this.botonCancelar.setAttribute("aria-label", "Cancelar");
+
+        this.botonAceptar = document.createElement("button");
+        this.botonAceptar.className = "modal-boton modal-boton-aceptar";
+        this.botonAceptar.textContent = "Aceptar";
+        this.botonAceptar.setAttribute("aria-label", "Aceptar");
+
+        botones.appendChild(this.botonCancelar);
+        botones.appendChild(this.botonAceptar);
+
+        this.modal.appendChild(this.titulo);
+        this.modal.appendChild(this.mensaje);
+        this.modal.appendChild(this.input);
+        this.modal.appendChild(botones);
+
+        this.contenedor.appendChild(this.modal);
+        document.body.appendChild(this.contenedor);
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && this.contenedor.style.display === "flex") {
+                this.cerrar();
+            }
+        });
+
+        this.contenedor.addEventListener("click", (e) => {
+            if (e.target === this.contenedor) this.cerrar();
+        });
+
+        this.botonAceptar.addEventListener("click", () => {
+            if (this.callbackAceptar) this.callbackAceptar(this.input.value);
+            this.cerrar();
+        });
+
+        this.botonCancelar.addEventListener("click", () => {
+            if (this.callbackCancelar) this.callbackCancelar();
+            this.cerrar();
+        });
+    },
+
+    mostrar({ titulo, mensaje, conInput = false, placeholder = "", valorInput = "", textoAceptar = "Aceptar", textoCancelar = "Cancelar", onAceptar = null, onCancelar = null }) {
+        this.titulo.textContent = titulo;
+        this.mensaje.textContent = mensaje;
+        this.botonAceptar.textContent = textoAceptar;
+        this.botonCancelar.textContent = textoCancelar;
+        this.callbackAceptar = onAceptar;
+        this.callbackCancelar = onCancelar;
+
+        if (conInput) {
+            this.input.style.display = "block";
+            this.input.placeholder = placeholder;
+            this.input.value = valorInput;
+            setTimeout(() => this.input.focus(), 100);
+        } else {
+            this.input.style.display = "none";
+        }
+
+        this.botonCancelar.style.display = onCancelar ? "inline-block" : "none";
+        this.contenedor.style.display = "flex";
+    },
+
+    cerrar() {
+        this.contenedor.style.display = "none";
+        this.callbackAceptar = null;
+        this.callbackCancelar = null;
+    },
+
+    alert(mensaje, titulo = "Aviso") {
+        this.mostrar({ titulo, mensaje });
+    },
+
+    confirm(mensaje, titulo = "Confirmar", onAceptar = null) {
+        this.mostrar({ titulo, mensaje, textoAceptar: "Sí", textoCancelar: "No", onAceptar });
+    }
+};
+
+Modal.init();
+
+
+// ================================
+// 3. ESTADO Y ELEMENTOS DEL DOM
+// ================================
+
+if (!Utilidades.localStorageDisponible()) {
+    Modal.alert("Tu navegador no soporta almacenamiento local. La app no funcionará correctamente.", "Error");
+}
+
 const entradaFecha = document.getElementById("fecha");
 const entradaHoras = document.getElementById("horas");
 const entradaPago = document.getElementById("pago");
-
 const botonAgregar = document.getElementById("botonAgregar");
-
 const tablaRegistros = document.getElementById("tablaRegistros");
-
 const totalGeneral = document.getElementById("totalGeneral");
 const totalHoras = document.getElementById("totalHoras");
 const totalDias = document.getElementById("totalDias");
-
 const filtroMes = document.getElementById("filtroMes");
-
 const mensaje = document.getElementById("mensaje");
 
-
-// ================================
-// REGISTROS
-// ================================
-
 let registros = [];
-
-try {
-
-    const datosGuardados =
-        JSON.parse(localStorage.getItem("registros"));
-
-    if (Array.isArray(datosGuardados)) {
-
-        registros = datosGuardados;
-
-    }
-
-} catch (error) {
-
-    registros = [];
-
-}
-// Registro que estamos editando
 let registroEditando = null;
 
-
-// ================================
-// CONVERTIR HORAS
-// ================================
-
-function convertirHoras(horasTexto) {
-
-    horasTexto = String(horasTexto).trim();
-
-    if (horasTexto.includes(":")) {
-
-        const partes = horasTexto.split(":");
-
-        if (partes.length !== 2) {
-            return NaN;
-        }
-
-        const horas = Number(partes[0]);
-        const minutos = Number(partes[1]);
-
-        if (isNaN(horas) || isNaN(minutos)) {
-            return NaN;
-        }
-
-        if (horas < 0) {
-            return NaN;
-        }
-
-        if (minutos < 0 || minutos >= 60) {
-            return NaN;
-        }
-
-        return horas + (minutos / 60);
-    }
-
-    const horas = Number(horasTexto);
-
-    if (isNaN(horas) || horas < 0) {
-        return NaN;
-    }
-
-    return horas;
+try {
+    const datosGuardados = JSON.parse(localStorage.getItem("registros"));
+    if (Array.isArray(datosGuardados)) registros = datosGuardados;
+} catch {
+    registros = [];
 }
-
-
-// ================================
-// CONVERTIR A MINUTOS
-// ================================
-
-function convertirAMinutos(horasTexto) {
-
-    const horas = convertirHoras(horasTexto);
-
-    if (isNaN(horas)) {
-        return NaN;
-    }
-
-    return Math.round(horas * 60);
-}
-
-
-// ================================
-// FORMATO DE HORAS
-// ================================
-
-function formatoHoras(minutos) {
-
-    const horas = Math.floor(minutos / 60);
-    const minutosRestantes = minutos % 60;
-
-    return (
-        horas +
-        ":" +
-        String(minutosRestantes).padStart(2, "0")
-    );
-}
-
-
-// ================================
-// NOMBRE DEL DÍA
-// ================================
-
-function obtenerNombreDia(fecha) {
-
-    const partes = fecha.split("-");
-
-    const fechaObjeto = new Date(
-        Number(partes[0]),
-        Number(partes[1]) - 1,
-        Number(partes[2])
-    );
-
-    const nombresDias = [
-        "Domingo",
-        "Lunes",
-        "Martes",
-        "Miércoles",
-        "Jueves",
-        "Viernes",
-        "Sábado"
-    ];
-
-    return nombresDias[fechaObjeto.getDay()];
-}
-
-
-// ================================
-// GUARDAR REGISTROS
-// ================================
 
 function guardarRegistros() {
-
     try {
-
-        localStorage.setItem(
-            "registros",
-            JSON.stringify(registros)
-        );
-
-    } catch (error) {
-
-        alert(
-            "No se pudieron guardar los registros."
-        );
-
+        localStorage.setItem("registros", JSON.stringify(registros));
+    } catch {
+        Modal.alert("No se pudieron guardar los registros.", "Error");
     }
 }
 
 
 // ================================
-// ACTUALIZAR RESUMEN
+// 4. TABLA DE REGISTROS
 // ================================
 
-function actualizarResumen() {
-
+function mostrarRegistros() {
     const mesSeleccionado = filtroMes.value;
+    let registrosMostrar = [...registros];
 
+    if (mesSeleccionado !== "todos") {
+        registrosMostrar = registrosMostrar.filter(r => r.fecha.startsWith(mesSeleccionado));
+    }
+
+    registrosMostrar.sort((a, b) => b.fecha.localeCompare(a.fecha));
+
+    tablaRegistros.innerHTML = "";
+
+    for (const registro of registrosMostrar) {
+        const fila = document.createElement("tr");
+        fila.dataset.fecha = registro.fecha;
+
+        const celdaDia = document.createElement("td");
+        celdaDia.textContent = Utilidades.obtenerNombreDia(registro.fecha);
+
+        const celdaFecha = document.createElement("td");
+        celdaFecha.textContent = registro.fecha;
+
+        const celdaHoras = document.createElement("td");
+        celdaHoras.textContent = registro.horas;
+
+        const celdaPago = document.createElement("td");
+        celdaPago.textContent = registro.pago.toFixed(2) + " €";
+
+        const celdaTotal = document.createElement("td");
+        celdaTotal.textContent = registro.total.toFixed(2) + " €";
+
+        const celdaAccion = document.createElement("td");
+
+        const botonEditar = document.createElement("button");
+        botonEditar.textContent = "✏️ Editar";
+        botonEditar.className = "boton-editar";
+        botonEditar.setAttribute("aria-label", "Editar registro del " + registro.fecha);
+        botonEditar.addEventListener("click", () => editarRegistro(registro));
+
+        const botonEliminar = document.createElement("button");
+        botonEliminar.textContent = "🗑️ Eliminar";
+        botonEliminar.className = "boton-eliminar";
+        botonEliminar.setAttribute("aria-label", "Eliminar registro del " + registro.fecha);
+        botonEliminar.addEventListener("click", () => eliminarRegistro(registro));
+
+        celdaAccion.appendChild(botonEditar);
+        celdaAccion.appendChild(botonEliminar);
+
+        fila.appendChild(celdaDia);
+        fila.appendChild(celdaFecha);
+        fila.appendChild(celdaHoras);
+        fila.appendChild(celdaPago);
+        fila.appendChild(celdaTotal);
+        fila.appendChild(celdaAccion);
+
+        tablaRegistros.appendChild(fila);
+    }
+
+    actualizarResumen();
+}
+
+function actualizarResumen() {
+    const mesSeleccionado = filtroMes.value;
     let registrosMostrar = registros;
 
     if (mesSeleccionado !== "todos") {
-
-        registrosMostrar = registros.filter(function(registro) {
-
-            return registro.fecha.startsWith(
-                mesSeleccionado
-            );
-
-        });
+        registrosMostrar = registros.filter(r => r.fecha.startsWith(mesSeleccionado));
     }
 
     let minutosTotales = 0;
     let dineroTotal = 0;
 
     for (const registro of registrosMostrar) {
-
-        const minutos = convertirAMinutos(
-            registro.horas
-        );
-
-        if (!isNaN(minutos)) {
-            minutosTotales += minutos;
-        }
-
+        const minutos = Utilidades.convertirAMinutos(registro.horas);
+        if (!isNaN(minutos)) minutosTotales += minutos;
         dineroTotal += registro.total;
     }
 
-    totalHoras.textContent =
-        formatoHoras(minutosTotales);
-
-    totalGeneral.textContent =
-        dineroTotal.toFixed(2);
-
-    totalDias.textContent =
-        registrosMostrar.length;
+    totalHoras.textContent = Utilidades.formatoHoras(minutosTotales);
+    totalGeneral.textContent = dineroTotal.toFixed(2);
+    totalDias.textContent = registrosMostrar.length;
 }
-
-
-// ================================
-// MOSTRAR REGISTROS
-// ================================
-
-function mostrarRegistros() {
-
-    tablaRegistros.innerHTML = "";
-
-    const mesSeleccionado = filtroMes.value;
-
-    let registrosMostrar = [...registros];
-
-    // Filtrar por mes
-
-    if (mesSeleccionado !== "todos") {
-
-        registrosMostrar =
-            registrosMostrar.filter(function(registro) {
-
-                return registro.fecha.startsWith(
-                    mesSeleccionado
-                );
-
-            });
-    }
-
-    // Ordenar por fecha
-    // Más reciente primero
-
-    registrosMostrar.sort(function(a, b) {
-
-        return b.fecha.localeCompare(a.fecha);
-
-    });
-
-    for (const registro of registrosMostrar) {
-
-        mostrarRegistro(registro);
-
-    }
-
-    actualizarResumen();
-}
-
-
-// ================================
-// MOSTRAR UN REGISTRO
-// ================================
-
-function mostrarRegistro(registro) {
-
-    const fila = document.createElement("tr");
-
-    const celdaDia =
-        document.createElement("td");
-
-    const celdaFecha =
-        document.createElement("td");
-
-    const celdaHoras =
-        document.createElement("td");
-
-    const celdaPago =
-        document.createElement("td");
-
-    const celdaTotal =
-        document.createElement("td");
-
-    const celdaAccion =
-        document.createElement("td");
-
-
-    // Día
-
-    celdaDia.textContent =
-        obtenerNombreDia(registro.fecha);
-
-
-    // Fecha
-
-    celdaFecha.textContent =
-        registro.fecha;
-
-
-    // Horas
-
-    celdaHoras.textContent =
-        registro.horas;
-
-
-    // Pago
-
-    celdaPago.textContent =
-        registro.pago.toFixed(2) + " €";
-
-
-    // Total
-
-    celdaTotal.textContent =
-        registro.total.toFixed(2) + " €";
-
-
-    // ================================
-    // BOTÓN EDITAR
-    // ================================
-
-    const botonEditar =
-        document.createElement("button");
-
-    botonEditar.textContent =
-        "✏️ Editar";
-
-    botonEditar.className =
-        "boton-editar";
-
-    botonEditar.addEventListener(
-        "click",
-        function() {
-
-            editarRegistro(registro);
-
-        }
-    );
-
-
-    // ================================
-    // BOTÓN ELIMINAR
-    // ================================
-
-    const botonEliminar =
-        document.createElement("button");
-
-    botonEliminar.textContent =
-        "🗑️ Eliminar";
-
-    botonEliminar.className =
-        "boton-eliminar";
-
-    botonEliminar.addEventListener(
-        "click",
-        function() {
-
-            eliminarRegistro(registro);
-
-        }
-    );
-
-
-    celdaAccion.appendChild(
-        botonEditar
-    );
-
-    celdaAccion.appendChild(
-        botonEliminar
-    );
-
-
-    // ================================
-    // AÑADIR CELDAS
-    // ================================
-
-    fila.appendChild(celdaDia);
-
-    fila.appendChild(celdaFecha);
-
-    fila.appendChild(celdaHoras);
-
-    fila.appendChild(celdaPago);
-
-    fila.appendChild(celdaTotal);
-
-    fila.appendChild(celdaAccion);
-
-    tablaRegistros.appendChild(fila);
-}
-
-
-// ================================
-// ELIMINAR REGISTRO
-// ================================
 
 function eliminarRegistro(registro) {
-
-    const confirmar =
-        confirm(
-            "¿Seguro que quieres eliminar este registro?"
-        );
-
-    if (!confirmar) {
-        return;
-    }
-
-    registros = registros.filter(
-        function(item) {
-
-            return item !== registro;
-
-        }
-    );
-
-    guardarRegistros();
-
-    actualizarListaMeses();
-
-    mostrarRegistros();
-}
-
-
-// ================================
-// EDITAR REGISTRO
-// ================================
-
-function editarRegistro(registro) {
-
-    entradaFecha.value =
-        registro.fecha;
-
-    entradaHoras.value =
-        registro.horas;
-
-    entradaPago.value =
-        registro.pago;
-
-    registroEditando = registro;
-
-    botonAgregar.textContent =
-        "💾 Guardar cambios";
-
-    mensaje.textContent =
-        "✏️ Estás editando un registro";
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
+    Modal.confirm("¿Seguro que quieres eliminar este registro?", "Eliminar registro", () => {
+        registros = registros.filter(item => item !== registro);
+        guardarRegistros();
+        actualizarListaMeses();
+        mostrarRegistros();
     });
 }
 
+function editarRegistro(registro) {
+    entradaFecha.value = registro.fecha;
+    entradaHoras.value = registro.horas;
+    entradaPago.value = registro.pago;
+    registroEditando = registro;
+    botonAgregar.textContent = "💾 Guardar cambios";
+    mensaje.textContent = "✏️ Estás editando un registro";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
 
 // ================================
-// COMPROBAR FECHA DUPLICADA
+// 5. FORMULARIO (AGREGAR/EDITAR)
 // ================================
 
 function existeOtraFecha(fecha) {
-
-    return registros.some(
-        function(registro) {
-
-            return (
-                registro.fecha === fecha &&
-                registro !== registroEditando
-            );
-
-        }
-    );
+    return registros.some(r => r.fecha === fecha && r !== registroEditando);
 }
 
-
-// ================================
-// AGREGAR / EDITAR
-// ================================
-
-botonAgregar.addEventListener(
-    "click",
-    function() {
-
-        const fecha =
-            entradaFecha.value;
-
-        if (fecha === "") {
-
-            alert(
-                "Debes seleccionar una fecha."
-            );
-
-            return;
-        }
-
-
-        const horas =
-            entradaHoras.value.trim();
-
-        if (horas === "") {
-
-            alert(
-                "Debes introducir las horas trabajadas."
-            );
-
-            return;
-        }
-
-
-        const pago =
-            entradaPago.value;
-
-        if (pago === "") {
-
-            alert(
-                "Debes introducir el pago por hora."
-            );
-
-            return;
-        }
-
-
-        // ================================
-        // VALIDAR HORAS
-        // ================================
-
-        const horasDecimales =
-            convertirHoras(horas);
-
-        if (isNaN(horasDecimales)) {
-
-            alert(
-                "Las horas deben ser un número válido, por ejemplo 8 o 8:30."
-            );
-
-            return;
-        }
-
-
-        // ================================
-        // VALIDAR PAGO
-        // ================================
-
-        const pagoNumero =
-            Number(pago);
-
-        if (
-            isNaN(pagoNumero) ||
-            pagoNumero < 0
-        ) {
-
-            alert(
-                "El pago por hora no es válido."
-            );
-
-            return;
-        }
-
-
-        // ================================
-        // COMPROBAR DUPLICADO
-        // ================================
-
-        if (existeOtraFecha(fecha)) {
-
-            alert(
-                "Ya existe un registro para esa fecha."
-            );
-
-            return;
-        }
-
-
-        // ================================
-        // CALCULAR TOTAL
-        // ================================
-
-        const totalDia =
-            horasDecimales *
-            pagoNumero;
-
-
-        // ================================
-        // EDITAR
-        // ================================
-
-        if (registroEditando !== null) {
-
-            registroEditando.fecha =
-                fecha;
-
-            registroEditando.horas =
-                horas;
-
-            registroEditando.pago =
-                pagoNumero;
-
-            registroEditando.total =
-                totalDia;
-
-            registroEditando =
-                null;
-
-            botonAgregar.textContent =
-                "➕ Agregar";
-
-            mensaje.textContent =
-                "✅ Registro actualizado";
-        }
-
-
-        // ================================
-        // NUEVO REGISTRO
-        // ================================
-
-        else {
-
-            const registro = {
-
-                fecha: fecha,
-
-                horas: horas,
-
-                pago: pagoNumero,
-
-                total: totalDia
-            };
-
-            registros.push(registro);
-
-            mensaje.textContent =
-                "✅ Registro agregado";
-        }
-
-
-        // ================================
-        // GUARDAR
-        // ================================
-
-        guardarRegistros();
-
-
-        // ================================
-        // ACTUALIZAR PÁGINA
-        // ================================
-
-        actualizarListaMeses();
-
-        mostrarRegistros();
-
-
-        // ================================
-        // LIMPIAR FORMULARIO
-        // ================================
-
-        entradaFecha.value = "";
-
-        entradaHoras.value = "";
-
-        entradaPago.value = "";
-
-
-        // Quitar mensaje después de un momento
-
-        setTimeout(
-            function() {
-
-                mensaje.textContent = "";
-
-            },
-            2500
-        );
-
+botonAgregar.addEventListener("click", () => {
+    const fecha = entradaFecha.value;
+    if (fecha === "") { Modal.alert("Debes seleccionar una fecha.", "Campo vacío"); return; }
+
+    const horas = entradaHoras.value.trim();
+    if (horas === "") { Modal.alert("Debes introducir las horas trabajadas.", "Campo vacío"); return; }
+
+    const pago = entradaPago.value;
+    if (pago === "") { Modal.alert("Debes introducir el pago por hora.", "Campo vacío"); return; }
+
+    const horasDecimales = Utilidades.convertirHoras(horas);
+    if (isNaN(horasDecimales)) { Modal.alert("Las horas deben ser un número válido, por ejemplo 8 o 8:30.", "Horas inválidas"); return; }
+
+    const pagoNumero = Number(pago);
+    if (isNaN(pagoNumero) || pagoNumero < 0) { Modal.alert("El pago por hora no es válido.", "Pago inválido"); return; }
+
+    if (existeOtraFecha(fecha)) { Modal.alert("Ya existe un registro para esa fecha.", "Fecha duplicada"); return; }
+
+    const totalDia = horasDecimales * pagoNumero;
+
+    if (registroEditando !== null) {
+        registroEditando.fecha = fecha;
+        registroEditando.horas = horas;
+        registroEditando.pago = pagoNumero;
+        registroEditando.total = totalDia;
+        registroEditando = null;
+        botonAgregar.textContent = "➕ Agregar";
+        mensaje.textContent = "✅ Registro actualizado";
+    } else {
+        registros.push({ fecha, horas, pago: pagoNumero, total: totalDia });
+        mensaje.textContent = "✅ Registro agregado";
     }
-);
+
+    guardarRegistros();
+    actualizarListaMeses();
+    mostrarRegistros();
+
+    entradaFecha.value = "";
+    entradaHoras.value = "";
+    entradaPago.value = "";
+
+    setTimeout(() => { mensaje.textContent = ""; }, 2500);
+});
 
 
 // ================================
-// CREAR LISTA DE MESES
+// 6. ENTRADA / SALIDA (RELOJ)
+// ================================
+
+const botonReloj = document.getElementById("botonReloj");
+const estadoReloj = document.getElementById("estadoReloj");
+
+let horaEntrada = null;
+let trabajando = false;
+
+// Cargar estado del reloj desde localStorage
+try {
+    const estadoGuardado = JSON.parse(localStorage.getItem("reloj"));
+    if (estadoGuardado && estadoGuardado.trabajando) {
+        horaEntrada = new Date(estadoGuardado.horaEntrada);
+        trabajando = true;
+    }
+} catch {}
+
+function guardarEstadoReloj() {
+    try {
+        localStorage.setItem("reloj", JSON.stringify({ trabajando, horaEntrada: horaEntrada ? horaEntrada.toISOString() : null }));
+    } catch {}
+}
+
+function actualizarBotonReloj() {
+    if (trabajando) {
+        botonReloj.textContent = "🛑 Salida";
+        botonReloj.className = "boton-salida";
+        const ahora = new Date();
+        const diff = Math.floor((ahora - horaEntrada) / 1000);
+        const h = Math.floor(diff / 3600);
+        const m = Math.floor((diff % 3600) / 60);
+        estadoReloj.textContent = "Trabajando desde las " + horaEntrada.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) + " (llevas " + h + "h " + m + "m)";
+    } else {
+        botonReloj.textContent = "⏰ Entrada";
+        botonReloj.className = "boton-entrada";
+        estadoReloj.textContent = "No has fichado hoy";
+    }
+}
+
+botonReloj.addEventListener("click", () => {
+    if (!trabajando) {
+        // Fichar entrada
+        horaEntrada = new Date();
+        trabajando = true;
+        guardarEstadoReloj();
+        actualizarBotonReloj();
+        mensaje.textContent = "🌅 ¡Has comenzado tu jornada laboral! Entrada registrada a las " + horaEntrada.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+        setTimeout(() => { mensaje.textContent = ""; }, 2500);
+    } else {
+        // Fichar salida
+        const horaSalida = new Date();
+        const diffMs = horaSalida - horaEntrada;
+        const diffMinutos = Math.round(diffMs / 60000);
+
+        if (diffMinutos < 1) {
+            Modal.alert("Has trabajado menos de 1 minuto. No se registrará.", "Tiempo muy corto");
+            return;
+        }
+
+        const horasTexto = Utilidades.formatoHoras(diffMinutos);
+        const fechaHoy = horaSalida.toISOString().split("T")[0];
+
+        // Usar el pago por hora del último registro, o pedirlo
+        const pagoUltimo = registros.length > 0 ? registros[registros.length - 1].pago : 0;
+        const pagoNumero = Number(entradaPago.value) || pagoUltimo;
+
+        if (pagoNumero <= 0) {
+            Modal.alert("Introduce tu pago por hora en el formulario para calcular el total.", "Pago necesario");
+            return;
+        }
+
+        const totalDia = (diffMinutos / 60) * pagoNumero;
+
+        // Verificar si ya existe registro para hoy
+        if (existeOtraFecha(fechaHoy)) {
+            Modal.confirm("Ya existe un registro para hoy. ¿Quieres añadir estas horas igualmente?", "Registro duplicado", () => {
+                registros.push({ fecha: fechaHoy, horas: horasTexto, pago: pagoNumero, total: totalDia });
+                guardarRegistros();
+                actualizarListaMeses();
+                mostrarRegistros();
+                mensaje.textContent = "🌙 ¡ooo que no sea un adios definitivo! Salida registrada: " + horasTexto + " trabajadas";
+                setTimeout(() => { mensaje.textContent = ""; }, 2500);
+            });
+        } else {
+            registros.push({ fecha: fechaHoy, horas: horasTexto, pago: pagoNumero, total: totalDia });
+            guardarRegistros();
+            actualizarListaMeses();
+            mostrarRegistros();
+            mensaje.textContent = "✅ Salida registrada: " + horasTexto + " trabajadas";
+            setTimeout(() => { mensaje.textContent = ""; }, 2500);
+        }
+
+        trabajando = false;
+        horaEntrada = null;
+        guardarEstadoReloj();
+        actualizarBotonReloj();
+    }
+});
+
+// Actualizar cada minuto si está trabajando
+setInterval(() => {
+    if (trabajando) actualizarBotonReloj();
+}, 60000);
+
+actualizarBotonReloj();
+
+
+// ================================
+// 7. FILTRO POR MES
 // ================================
 
 function actualizarListaMeses() {
-
-    const mesActual =
-        filtroMes.value;
-
+    const mesActual = filtroMes.value;
     const meses = [];
 
     for (const registro of registros) {
-
-        const mes =
-            registro.fecha.substring(
-                0,
-                7
-            );
-
-        if (!meses.includes(mes)) {
-
-            meses.push(mes);
-
-        }
+        const mes = registro.fecha.substring(0, 7);
+        if (!meses.includes(mes)) meses.push(mes);
     }
-
-
-    // Ordenar meses
 
     meses.sort().reverse();
-
     filtroMes.innerHTML = "";
 
+    const opcionTodos = document.createElement("option");
+    opcionTodos.value = "todos";
+    opcionTodos.textContent = "Todos los meses";
+    filtroMes.appendChild(opcionTodos);
 
-    // Opción todos
-
-    const opcionTodos =
-        document.createElement("option");
-
-    opcionTodos.value =
-        "todos";
-
-    opcionTodos.textContent =
-        "Todos los meses";
-
-    filtroMes.appendChild(
-        opcionTodos
-    );
-
-
-    // Crear meses
+    const nombresMeses = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
     for (const mes of meses) {
-
-        const opcion =
-            document.createElement("option");
-
-        opcion.value =
-            mes;
-
-        const partes =
-            mes.split("-");
-
-        const año =
-            partes[0];
-
-        const numeroMes =
-            Number(partes[1]);
-
-        const nombresMeses = [
-            "",
-            "Enero",
-            "Febrero",
-            "Marzo",
-            "Abril",
-            "Mayo",
-            "Junio",
-            "Julio",
-            "Agosto",
-            "Septiembre",
-            "Octubre",
-            "Noviembre",
-            "Diciembre"
-        ];
-
-        opcion.textContent =
-            nombresMeses[numeroMes] +
-            " " +
-            año;
-
-        filtroMes.appendChild(
-            opcion
-        );
+        const opcion = document.createElement("option");
+        opcion.value = mes;
+        const partes = mes.split("-");
+        opcion.textContent = nombresMeses[Number(partes[1])] + " " + partes[0];
+        filtroMes.appendChild(opcion);
     }
 
-
-    // Intentar conservar selección
-
-    if (
-        mesActual !== "" &&
-        (
-            mesActual === "todos" ||
-            meses.includes(mesActual)
-        )
-    ) {
-
-        filtroMes.value =
-            mesActual;
+    if (mesActual !== "" && (mesActual === "todos" || meses.includes(mesActual))) {
+        filtroMes.value = mesActual;
     }
 }
 
-
-// ================================
-// CAMBIAR MES
-// ================================
-
-filtroMes.addEventListener(
-    "change",
-    function() {
-
-        mostrarRegistros();
-
-    }
-);
+filtroMes.addEventListener("change", () => mostrarRegistros());
 
 
 // ================================
-// INICIAR APP
+// 8. COPIA DE SEGURIDAD
 // ================================
 
-actualizarListaMeses();
-
-mostrarRegistros();
-
-
-// ===============================
-// COPIA DE SEGURIDAD
-// ===============================
-
-const botonCopia =
-    document.getElementById("botonCopia");
-
-const botonRestaurar =
-    document.getElementById("botonRestaurar");
-
-const archivoRestaurar =
-    document.getElementById("archivoRestaurar");
-
-
-// ===============================
-// VALIDAR COPIA DE SEGURIDAD
-// ===============================
-
-// ===============================
-// VALIDAR FECHA
-// ===============================
-
-function fechaValida(fecha) {
-
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
-        return false;
-    }
-
-    const partes = fecha.split("-");
-
-    const año = Number(partes[0]);
-    const mes = Number(partes[1]);
-    const dia = Number(partes[2]);
-
-    const fechaObjeto =
-        new Date(año, mes - 1, dia);
-
-    return (
-        fechaObjeto.getFullYear() === año &&
-        fechaObjeto.getMonth() === mes - 1 &&
-        fechaObjeto.getDate() === dia
-    );
-}
-
-
-// ===============================
-// VALIDAR COPIA DE SEGURIDAD
-// ===============================
+const botonCopia = document.getElementById("botonCopia");
+const botonRestaurar = document.getElementById("botonRestaurar");
+const archivoRestaurar = document.getElementById("archivoRestaurar");
 
 function copiaValida(datos) {
-
-    if (!Array.isArray(datos)) {
-        return false;
-    }
-
+    if (!Array.isArray(datos)) return false;
     for (const registro of datos) {
-
-        if (
-            !registro ||
-            typeof registro !== "object"
-        ) {
-            return false;
-        }
-
-        if (
-            typeof registro.fecha !== "string" ||
-            !fechaValida(registro.fecha)
-        ) {
-            return false;
-        }
-
-        if (
-            typeof registro.horas !== "string" ||
-            !Number.isFinite(
-                convertirHoras(registro.horas)
-            ) ||
-            convertirHoras(registro.horas) < 0
-        ) {
-            return false;
-        }
-
-        if (
-            typeof registro.pago !== "number" ||
-            !Number.isFinite(registro.pago) ||
-            registro.pago < 0
-        ) {
-            return false;
-        }
-
-        if (
-            typeof registro.total !== "number" ||
-            !Number.isFinite(registro.total) ||
-            registro.total < 0
-        ) {
-            return false;
-        }
-
+        if (!registro || typeof registro !== "object") return false;
+        if (typeof registro.fecha !== "string" || !Utilidades.fechaValida(registro.fecha)) return false;
+        if (typeof registro.horas !== "string" || !Number.isFinite(Utilidades.convertirHoras(registro.horas)) || Utilidades.convertirHoras(registro.horas) < 0) return false;
+        if (typeof registro.pago !== "number" || !Number.isFinite(registro.pago) || registro.pago < 0) return false;
+        if (typeof registro.total !== "number" || !Number.isFinite(registro.total) || registro.total < 0) return false;
     }
-
     return true;
 }
 
+botonCopia.addEventListener("click", () => {
+    const datos = JSON.stringify(registros, null, 2);
+    const archivo = new Blob([datos], { type: "application/json" });
+    const enlace = document.createElement("a");
+    enlace.href = URL.createObjectURL(archivo);
+    enlace.download = "copia-horas-trabajo.json";
+    enlace.click();
+    URL.revokeObjectURL(enlace.href);
+});
 
-// ===============================
-// DESCARGAR COPIA
-// ===============================
+botonRestaurar.addEventListener("click", () => archivoRestaurar.click());
 
-botonCopia.addEventListener(
-    "click",
-    function () {
+archivoRestaurar.addEventListener("change", () => {
+    const archivo = archivoRestaurar.files[0];
+    if (!archivo) return;
 
-        const datos =
-            JSON.stringify(
-                registros,
-                null,
-                2
-            );
-
-        const archivo =
-            new Blob(
-                [datos],
-                {
-                    type: "application/json"
+    Modal.confirm("¿Quieres restaurar esta copia? Los registros actuales serán reemplazados.", "Restaurar copia", () => {
+        const lector = new FileReader();
+        lector.onload = (evento) => {
+            try {
+                const datos = JSON.parse(evento.target.result);
+                if (!copiaValida(datos)) {
+                    Modal.alert("La copia no es válida o contiene datos incorrectos.", "Error");
+                    return;
                 }
-            );
-
-        const enlace =
-            document.createElement("a");
-
-        enlace.href =
-            URL.createObjectURL(archivo);
-
-        enlace.download =
-            "copia-horas-trabajo.json";
-
-        enlace.click();
-
-        URL.revokeObjectURL(
-            enlace.href
-        );
-    }
-);
-
-
-// ===============================
-// BOTÓN RESTAURAR
-// ===============================
-
-botonRestaurar.addEventListener(
-    "click",
-    function () {
-
-        archivoRestaurar.click();
-
-    }
-);
-
-
-// ===============================
-// LEER COPIA
-// ===============================
-
-archivoRestaurar.addEventListener(
-    "change",
-    function () {
-
-        const archivo =
-            archivoRestaurar.files[0];
-
-        if (!archivo) {
-            return;
-        }
-
-        const lector =
-            new FileReader();
-
-        lector.onload =
-            function (evento) {
-
-                try {
-
-                    const datos =
-                        JSON.parse(
-                            evento.target.result
-                        );
-
-
-                    // ===============================
-                    // VALIDAR COPIA
-                    // ===============================
-
-                    if (!copiaValida(datos)) {
-
-                        alert(
-                            "La copia no es válida o contiene datos incorrectos."
-                        );
-
-                        archivoRestaurar.value = "";
-
-                        return;
-                    }
-
-
-                    // ===============================
-                    // CONFIRMAR RESTAURACIÓN
-                    // ===============================
-
-                    const confirmar =
-                        confirm(
-                            "¿Quieres restaurar esta copia? Los registros actuales serán reemplazados."
-                        );
-
-                    if (!confirmar) {
-
-                        archivoRestaurar.value = "";
-
-                        return;
-                    }
-
-
-                    // ===============================
-                    // RESTAURAR
-                    // ===============================
-
-                    registros =
-                        datos;
-
-                    guardarRegistros();
-
-                    actualizarListaMeses();
-
-                    mostrarRegistros();
-
-
-                    alert(
-                        "Copia restaurada correctamente."
-                    );
-
-
-                } catch (error) {
-
-                    alert(
-                        "No se pudo leer la copia."
-                    );
-
-                }
-
-                archivoRestaurar.value = "";
-
-            };
-
+                registros = datos;
+                guardarRegistros();
+                actualizarListaMeses();
+                mostrarRegistros();
+                Modal.alert("Copia restaurada correctamente.", "Éxito");
+            } catch {
+                Modal.alert("No se pudo leer la copia.", "Error");
+            }
+        };
         lector.readAsText(archivo);
-    }
-);  
+    });
+
+    archivoRestaurar.value = "";
+});
 
 
-// ===============================
-// EXPORTAR A EXCEL
-// ===============================
+// ================================
+// 9. EXPORTAR A EXCEL
+// ================================
 
 const botonExcel = document.getElementById("botonExcel");
 
-botonExcel.addEventListener("click", function () {
-
-    if (registros.length === 0) {
-        alert("No hay registros para exportar.");
-        return;
-    }
-
-    // =================================
-    // CALCULAR TOTAL DE DINERO
-    // =================================
+botonExcel.addEventListener("click", () => {
+    if (registros.length === 0) { Modal.alert("No hay registros para exportar.", "Sin datos"); return; }
 
     let totalDinero = 0;
-
-    registros.forEach(function (registro) {
-        totalDinero += Number(registro.total);
-    });
-
-
-    // =================================
-    // CALCULAR TOTAL DE HORAS
-    // =================================
-
     let totalMinutos = 0;
 
-    registros.forEach(function (registro) {
-
-        const minutos = convertirAMinutos(registro.horas);
-
-        if (!isNaN(minutos)) {
-            totalMinutos += minutos;
-        }
-
+    registros.forEach((registro) => {
+        totalDinero += Number(registro.total);
+        const minutos = Utilidades.convertirAMinutos(registro.horas);
+        if (!isNaN(minutos)) totalMinutos += minutos;
     });
 
-
     const horasTotales = Math.floor(totalMinutos / 60);
-
     const minutosRestantes = totalMinutos % 60;
-
-    const totalHoras =
-        horasTotales +
-        ":" +
-        String(minutosRestantes).padStart(2, "0");
-
-
-    // =================================
-    // CREAR DATOS PARA EXCEL
-    // =================================
+    const totalHoras = horasTotales + ":" + String(minutosRestantes).padStart(2, "0");
 
     const datosExcel = [];
+    datosExcel.push(["Día", "Fecha", "Horas", "Pago por hora (€)", "Total (€)"]);
 
-
-    // Encabezados
-
-    datosExcel.push([
-        "Día",
-        "Fecha",
-        "Horas",
-        "Pago por hora (€)",
-        "Total (€)"
-    ]);
-
-
-    // Registros
-
-    registros.forEach(function (registro) {
-
+    registros.forEach((registro) => {
         datosExcel.push([
-            obtenerNombreDia(registro.fecha),
+            Utilidades.obtenerNombreDia(registro.fecha),
             registro.fecha,
             registro.horas,
             Number(registro.pago),
             Number(registro.total)
         ]);
-
     });
 
-
-    // =================================
-    // TOTALES
-    // =================================
-
-    // Fila vacía
-
     datosExcel.push([]);
-
-
-    // Total de horas
-
-    datosExcel.push([
-        "",
-        "",
-        "",
-        "TOTAL HORAS:",
-        totalHoras
-    ]);
-
-
-    // Total general de dinero
-
-    datosExcel.push([
-        "",
-        "",
-        "",
-        "TOTAL GENERAL:",
-        totalDinero
-    ]);
-
-
-    // =================================
-    // CREAR EXCEL
-    // =================================
+    datosExcel.push(["", "", "", "TOTAL HORAS:", totalHoras]);
+    datosExcel.push(["", "", "", "TOTAL GENERAL:", totalDinero]);
 
     const hoja = XLSX.utils.aoa_to_sheet(datosExcel);
-
     const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, "Horas de trabajo");
 
-
-    XLSX.utils.book_append_sheet(
-        libro,
-        hoja,
-        "Horas de trabajo"
-    );
-
-
-    // =================================
-    // ANCHO DE COLUMNAS
-    // =================================
-
-    hoja["!cols"] = [
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 12 },
-        { wch: 20 },
-        { wch: 18 }
-    ];
-
-
-    // =================================
-    // FORMATO DE DINERO
-    // =================================
+    hoja["!cols"] = [{ wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 20 }, { wch: 18 }];
 
     for (let fila = 2; fila <= registros.length + 1; fila++) {
-
-        if (hoja[`D${fila}`]) {
-            hoja[`D${fila}`].z = '0.00" €"';
-        }
-
-        if (hoja[`E${fila}`]) {
-            hoja[`E${fila}`].z = '0.00" €"';
-        }
-
+        if (hoja[`D${fila}`]) hoja[`D${fila}`].z = '0.00" €"';
+        if (hoja[`E${fila}`]) hoja[`E${fila}`].z = '0.00" €"';
     }
-
-
-    // Formato del total general
 
     const filaTotalDinero = registros.length + 4;
+    if (hoja[`E${filaTotalDinero}`]) hoja[`E${filaTotalDinero}`].z = '0.00" €"';
 
-    if (hoja[`E${filaTotalDinero}`]) {
-        hoja[`E${filaTotalDinero}`].z = '0.00" €"';
-    }
-
-
-    // =================================
-    // DESCARGAR EXCEL
-    // =================================
-
-    XLSX.writeFile(
-        libro,
-        "horas-de-trabajo.xlsx"
-    );
-
+    XLSX.writeFile(libro, "horas-de-trabajo.xlsx");
 });
 
-// ===============================
-// MODO OSCURO / MODO CLARO
-// ===============================
 
-const botonTema =
-    document.getElementById("botonTema");
+// ================================
+// 10. MODO OSCURO / MODO CLARO
+// ================================
 
-
-// ===============================
-// APLICAR TEMA
-// ===============================
+const botonTema = document.getElementById("botonTema");
 
 function aplicarTema(tema) {
-
     if (tema === "oscuro") {
-
         document.body.classList.add("modo-oscuro");
-
         botonTema.textContent = "☀️";
-
     } else {
-
         document.body.classList.remove("modo-oscuro");
-
         botonTema.textContent = "🌙";
-
     }
-
 }
 
-
-// ===============================
-// CAMBIAR TEMA
-// ===============================
-
-botonTema.addEventListener(
-    "click",
-    function () {
-
-        const modoOscuro =
-            document.body.classList.contains(
-                "modo-oscuro"
-            );
-
-        if (modoOscuro) {
-
-            aplicarTema("claro");
-
-            localStorage.setItem(
-                "tema",
-                "claro"
-            );
-
-        } else {
-
-            aplicarTema("oscuro");
-
-            localStorage.setItem(
-                "tema",
-                "oscuro"
-            );
-
-        }
-
+botonTema.addEventListener("click", () => {
+    const modoOscuro = document.body.classList.contains("modo-oscuro");
+    if (modoOscuro) {
+        aplicarTema("claro");
+        localStorage.setItem("tema", "claro");
+    } else {
+        aplicarTema("oscuro");
+        localStorage.setItem("tema", "oscuro");
     }
-);
+});
 
-
-// ===============================
-// RECUPERAR TEMA
-// ===============================
-
-const temaGuardado =
-    localStorage.getItem("tema");
-
+const temaGuardado = localStorage.getItem("tema");
 if (temaGuardado === "oscuro") {
-
     aplicarTema("oscuro");
-
 } else {
-
     aplicarTema("claro");
-
 }
+
+
+// ================================
+// 11. INICIALIZACIÓN
+// ================================
+
+actualizarListaMeses();
+mostrarRegistros();
