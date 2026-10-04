@@ -27,9 +27,13 @@ h1 {
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 15px;
     align-items: end;
+}
+
+.campo-trabajo {
+    grid-column: 1 / -1;
 }
 
 .campo {
@@ -54,15 +58,18 @@ h1 {
     padding: 11px;
     border: none;
     border-radius: 7px;
-    background: #2563eb;
+    background: linear-gradient(135deg, #10b981, #059669);
     color: white;
     font-size: 15px;
     font-weight: bold;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 #botonAgregar:hover {
-    background: #1d4ed8;
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 /* RESUMEN */
@@ -246,14 +253,32 @@ body.modo-oscuro .version {
     margin-right: 5px;
 }
 
-#botonCopia { background: #16a34a; }
-#botonCopia:hover { background: #15803d; }
+#botonCopia {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+}
+#botonCopia:hover {
+    background: linear-gradient(135deg, #4f46e5, #4338ca);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
 
-#botonRestaurar { background: #7c3aed; }
-#botonRestaurar:hover { background: #6d28d9; }
+#botonRestaurar {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+#botonRestaurar:hover {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
 
-#botonExcel { background: #0f766e; }
-#botonExcel:hover { background: #115e59; }
+#botonExcel {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+}
+#botonExcel:hover {
+    background: linear-gradient(135deg, #0891b2, #0e7490);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+}
 
 /* ===============================
    MODALES
@@ -350,7 +375,11 @@ body.modo-oscuro .version {
 /* RESPONSIVE */
 @media (max-width: 750px) {
     .formulario {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .campo-trabajo {
+        grid-column: 1 / -1;
     }
 
     .resumen {
@@ -485,6 +514,42 @@ body.modo-oscuro #estadoReloj {
 
 body.modo-oscuro #mensaje {
     color: #ffffff;
+}
+
+body.modo-oscuro #botonAgregar {
+    background: linear-gradient(135deg, #059669, #047857);
+}
+
+body.modo-oscuro #botonAgregar:hover {
+    background: linear-gradient(135deg, #047857, #065f46);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+body.modo-oscuro #botonCopia {
+    background: linear-gradient(135deg, #4f46e5, #4338ca);
+}
+
+body.modo-oscuro #botonCopia:hover {
+    background: linear-gradient(135deg, #4338ca, #3730a3);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+body.modo-oscuro #botonRestaurar {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+}
+
+body.modo-oscuro #botonRestaurar:hover {
+    background: linear-gradient(135deg, #6d28d9, #5b21b6);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+}
+
+body.modo-oscuro #botonExcel {
+    background: linear-gradient(135deg, #0891b2, #0e7490);
+}
+
+body.modo-oscuro #botonExcel:hover {
+    background: linear-gradient(135deg, #0e7490, #155e75);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);
 }
 
 body.modo-oscuro #botonTema {

@@ -13,7 +13,8 @@
 //   8. Copia de seguridad (exportar/importar)
 //   9. Exportar a Excel
 //  10. Modo oscuro/claro
-//  11. Inicialización
+//  11. Multi-trabajo (selección de empresa)
+//  12. Inicialización
 //
 // ================================
 
@@ -216,6 +217,7 @@ if (!Utilidades.localStorageDisponible()) {
 const entradaFecha = document.getElementById("fecha");
 const entradaHoras = document.getElementById("horas");
 const entradaPago = document.getElementById("pago");
+const entradaTrabajo = document.getElementById("trabajo");
 const botonAgregar = document.getElementById("botonAgregar");
 const tablaRegistros = document.getElementById("tablaRegistros");
 const totalGeneral = document.getElementById("totalGeneral");
@@ -249,7 +251,15 @@ function guardarRegistros() {
 
 function mostrarRegistros() {
     const mesSeleccionado = filtroMes.value;
+    const trabajoSeleccionado = entradaTrabajo.value.trim().toLowerCase();
     let registrosMostrar = [...registros];
+
+    // Filtrar por trabajo
+    if (trabajoSeleccionado !== "") {
+        registrosMostrar = registrosMostrar.filter(r => 
+            (r.trabajo || "").toLowerCase().includes(trabajoSeleccionado)
+        );
+    }
 
     if (mesSeleccionado !== "todos") {
         registrosMostrar = registrosMostrar.filter(r => r.fecha.startsWith(mesSeleccionado));
@@ -268,6 +278,9 @@ function mostrarRegistros() {
 
         const celdaFecha = document.createElement("td");
         celdaFecha.textContent = registro.fecha;
+
+        const celdaTrabajo = document.createElement("td");
+        celdaTrabajo.textContent = registro.trabajo || "—";
 
         const celdaHoras = document.createElement("td");
         celdaHoras.textContent = registro.horas;
@@ -297,6 +310,7 @@ function mostrarRegistros() {
 
         fila.appendChild(celdaDia);
         fila.appendChild(celdaFecha);
+        fila.appendChild(celdaTrabajo);
         fila.appendChild(celdaHoras);
         fila.appendChild(celdaPago);
         fila.appendChild(celdaTotal);
@@ -310,10 +324,18 @@ function mostrarRegistros() {
 
 function actualizarResumen() {
     const mesSeleccionado = filtroMes.value;
+    const trabajoSeleccionado = entradaTrabajo.value.trim().toLowerCase();
     let registrosMostrar = registros;
 
+    // Filtrar por trabajo
+    if (trabajoSeleccionado !== "") {
+        registrosMostrar = registrosMostrar.filter(r => 
+            (r.trabajo || "").toLowerCase().includes(trabajoSeleccionado)
+        );
+    }
+
     if (mesSeleccionado !== "todos") {
-        registrosMostrar = registros.filter(r => r.fecha.startsWith(mesSeleccionado));
+        registrosMostrar = registrosMostrar.filter(r => r.fecha.startsWith(mesSeleccionado));
     }
 
     let minutosTotales = 0;
@@ -378,16 +400,19 @@ botonAgregar.addEventListener("click", () => {
 
     const totalDia = horasDecimales * pagoNumero;
 
+    const trabajo = entradaTrabajo.value.trim();
+
     if (registroEditando !== null) {
         registroEditando.fecha = fecha;
         registroEditando.horas = horas;
         registroEditando.pago = pagoNumero;
         registroEditando.total = totalDia;
+        registroEditando.trabajo = trabajo;
         registroEditando = null;
         botonAgregar.textContent = "➕ Agregar";
         mensaje.textContent = "✅ Registro actualizado";
     } else {
-        registros.push({ fecha, horas, pago: pagoNumero, total: totalDia });
+        registros.push({ fecha, horas, pago: pagoNumero, total: totalDia, trabajo });
         mensaje.textContent = "✅ Registro agregado";
     }
 
@@ -567,6 +592,7 @@ function copiaValida(datos) {
         if (typeof registro.horas !== "string" || !Number.isFinite(Utilidades.convertirHoras(registro.horas)) || Utilidades.convertirHoras(registro.horas) < 0) return false;
         if (typeof registro.pago !== "number" || !Number.isFinite(registro.pago) || registro.pago < 0) return false;
         if (typeof registro.total !== "number" || !Number.isFinite(registro.total) || registro.total < 0) return false;
+        if (registro.trabajo !== undefined && typeof registro.trabajo !== "string") return false;
     }
     return true;
 }
@@ -635,12 +661,13 @@ botonExcel.addEventListener("click", () => {
     const totalHoras = horasTotales + ":" + String(minutosRestantes).padStart(2, "0");
 
     const datosExcel = [];
-    datosExcel.push(["Día", "Fecha", "Horas", "Pago por hora (€)", "Total (€)"]);
+    datosExcel.push(["Día", "Fecha", "Trabajo", "Horas", "Pago por hora (€)", "Total (€)"]);
 
     registros.forEach((registro) => {
         datosExcel.push([
             Utilidades.obtenerNombreDia(registro.fecha),
             registro.fecha,
+            registro.trabajo || "",
             registro.horas,
             Number(registro.pago),
             Number(registro.total)

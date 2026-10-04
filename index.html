@@ -15,7 +15,7 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis Horas de Trabajo v2.0</title>
+    <title>Mis Horas de Trabajo v3.0</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -33,6 +33,11 @@
 
         <!-- FORMULARIO -->
         <div class="formulario">
+            <div class="campo campo-trabajo">
+                <label for="trabajo">🏢 Trabajo / Empresa</label>
+                <input type="text" id="trabajo" placeholder="Ej: Oficina, Reparto..." aria-label="Nombre del trabajo o empresa">
+            </div>
+
             <div class="campo">
                 <label for="fecha">Fecha</label>
                 <input type="date" id="fecha" aria-label="Seleccionar fecha">
@@ -102,6 +107,7 @@
                     <tr>
                         <th scope="col">Día</th>
                         <th scope="col">Fecha</th>
+                        <th scope="col">Trabajo</th>
                         <th scope="col">Horas</th>
                         <th scope="col">Pago/hora</th>
                         <th scope="col">Total</th>
@@ -114,7 +120,7 @@
     </div>
 
     <!-- VERSIÓN -->
-    <div class="version">v2.0</div>
+    <div class="version">v3.0</div>
 
     <script src="app.js"></script>
 </body>
