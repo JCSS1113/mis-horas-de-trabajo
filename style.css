@@ -27,13 +27,44 @@ h1 {
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 15px;
     align-items: end;
 }
 
 .campo-trabajo {
-    grid-column: 1 / -1;
+    grid-column: span 2;
+}
+
+.trabajo-selector {
+    display: flex;
+    gap: 8px;
+}
+
+.trabajo-selector select {
+    flex: 1;
+    padding: 11px;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+    font-size: 15px;
+}
+
+#botonNuevoTrabajo {
+    padding: 11px 14px;
+    border: none;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#botonNuevoTrabajo:hover {
+    background: linear-gradient(135deg, #d97706, #b45309);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
 .campo {
@@ -380,6 +411,10 @@ body.modo-oscuro .version {
 
     .campo-trabajo {
         grid-column: 1 / -1;
+    }
+
+    .trabajo-selector {
+        flex-direction: row;
     }
 
     .resumen {

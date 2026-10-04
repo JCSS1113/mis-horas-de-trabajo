@@ -251,14 +251,12 @@ function guardarRegistros() {
 
 function mostrarRegistros() {
     const mesSeleccionado = filtroMes.value;
-    const trabajoSeleccionado = entradaTrabajo.value.trim().toLowerCase();
+    const trabajoSeleccionado = selectTrabajo.value;
     let registrosMostrar = [...registros];
 
     // Filtrar por trabajo
     if (trabajoSeleccionado !== "") {
-        registrosMostrar = registrosMostrar.filter(r => 
-            (r.trabajo || "").toLowerCase().includes(trabajoSeleccionado)
-        );
+        registrosMostrar = registrosMostrar.filter(r => r.trabajo === trabajoSeleccionado);
     }
 
     if (mesSeleccionado !== "todos") {
@@ -324,14 +322,12 @@ function mostrarRegistros() {
 
 function actualizarResumen() {
     const mesSeleccionado = filtroMes.value;
-    const trabajoSeleccionado = entradaTrabajo.value.trim().toLowerCase();
+    const trabajoSeleccionado = selectTrabajo.value;
     let registrosMostrar = registros;
 
     // Filtrar por trabajo
     if (trabajoSeleccionado !== "") {
-        registrosMostrar = registrosMostrar.filter(r => 
-            (r.trabajo || "").toLowerCase().includes(trabajoSeleccionado)
-        );
+        registrosMostrar = registrosMostrar.filter(r => r.trabajo === trabajoSeleccionado);
     }
 
     if (mesSeleccionado !== "todos") {
@@ -400,7 +396,7 @@ botonAgregar.addEventListener("click", () => {
 
     const totalDia = horasDecimales * pagoNumero;
 
-    const trabajo = entradaTrabajo.value.trim();
+    const trabajo = selectTrabajo.value;
 
     if (registroEditando !== null) {
         registroEditando.fecha = fecha;
@@ -732,8 +728,74 @@ if (temaGuardado === "oscuro") {
 
 
 // ================================
-// 11. INICIALIZACIÓN
+// 11. MULTI-TRABAJO (MENÚ DESPLEGABLE)
+// ================================
+
+const selectTrabajo = document.getElementById("trabajo");
+
+function actualizarListaTrabajos() {
+    const trabajoActual = selectTrabajo.value;
+    const trabajos = [];
+
+    for (const registro of registros) {
+        if (registro.trabajo && !trabajos.includes(registro.trabajo)) {
+            trabajos.push(registro.trabajo);
+        }
+    }
+
+    trabajos.sort();
+
+    selectTrabajo.innerHTML = "";
+
+    const opcionTodos = document.createElement("option");
+    opcionTodos.value = "";
+    opcionTodos.textContent = "Todos los trabajos";
+    selectTrabajo.appendChild(opcionTodos);
+
+    for (const trabajo of trabajos) {
+        const opcion = document.createElement("option");
+        opcion.value = trabajo;
+        opcion.textContent = trabajo;
+        selectTrabajo.appendChild(opcion);
+    }
+
+    if (trabajoActual && trabajos.includes(trabajoActual)) {
+        selectTrabajo.value = trabajoActual;
+    }
+}
+
+selectTrabajo.addEventListener("change", () => mostrarRegistros());
+
+const botonNuevoTrabajo = document.getElementById("botonNuevoTrabajo");
+
+botonNuevoTrabajo.addEventListener("click", () => {
+    Modal.mostrar({
+        titulo: "Nuevo trabajo",
+        mensaje: "Escribe el nombre del nuevo trabajo o empresa:",
+        conInput: true,
+        placeholder: "Ej: Oficina, Reparto, Clases...",
+        textoAceptar: "Añadir",
+        onAceptar: (nombre) => {
+            const nombreTrim = nombre.trim();
+            if (nombreTrim === "") {
+                Modal.alert("El nombre no puede estar vacío.", "Error");
+                return;
+            }
+            selectTrabajo.value = nombreTrim;
+            actualizarListaTrabajos();
+            selectTrabajo.value = nombreTrim;
+            mostrarRegistros();
+            mensaje.textContent = "✅ Trabajo '" + nombreTrim + "' añadido";
+            setTimeout(() => { mensaje.textContent = ""; }, 2500);
+        }
+    });
+});
+
+
+// ================================
+// 12. INICIALIZACIÓN
 // ================================
 
 actualizarListaMeses();
+actualizarListaTrabajos();
 mostrarRegistros();
