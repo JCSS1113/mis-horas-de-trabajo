@@ -832,7 +832,11 @@ botonEliminarTrabajo.addEventListener("click", () => {
         "¿Seguro que quieres eliminar '" + trabajoSeleccionado + "'? Se eliminarán todos sus registros.",
         "Eliminar trabajo",
         () => {
-            registros = registros.filter(r => r.trabajo !== trabajoSeleccionado);
+            registros = registros.filter(r => {
+                const registroTrabajo = (r.trabajo || "").trim().toLowerCase();
+                const seleccionado = trabajoSeleccionado.trim().toLowerCase();
+                return registroTrabajo !== seleccionado;
+            });
             guardarRegistros();
             actualizarListaTrabajos();
             actualizarListaMeses();
