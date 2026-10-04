@@ -67,6 +67,24 @@ h1 {
     box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
+#botonAsignarTrabajo {
+    padding: 11px 14px;
+    border: none;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#botonAsignarTrabajo:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
 #botonEliminarTrabajo {
     padding: 11px 14px;
     border: none;

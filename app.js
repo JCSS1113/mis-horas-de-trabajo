@@ -817,6 +817,46 @@ botonNuevoTrabajo.addEventListener("click", () => {
     });
 });
 
+// Botón asignar registros sin empresa
+const botonAsignarTrabajo = document.getElementById("botonAsignarTrabajo");
+
+botonAsignarTrabajo.addEventListener("click", () => {
+    const trabajoSeleccionado = selectTrabajo.value;
+
+    if (trabajoSeleccionado === "") {
+        Modal.alert("Selecciona primero un trabajo para asignar los registros.", "Sin selección");
+        return;
+    }
+
+    // Contar registros sin empresa
+    const sinEmpresa = registros.filter(r => !r.trabajo || r.trabajo.trim() === "");
+
+    if (sinEmpresa.length === 0) {
+        Modal.alert("No hay registros sin asignar.", "Sin datos");
+        return;
+    }
+
+    Modal.confirm(
+        "¿Asignar " + sinEmpresa.length + " registro(s) a '" + trabajoSeleccionado + "'?",
+        "Asignar registros",
+        () => {
+            registros = registros.map(r => {
+                if (!r.trabajo || r.trabajo.trim() === "") {
+                    r.trabajo = trabajoSeleccionado;
+                }
+                return r;
+            });
+            guardarRegistros();
+            actualizarListaTrabajos();
+            actualizarListaMeses();
+            actualizarEmpresaActual();
+            mostrarRegistros();
+            mensaje.textContent = "✅ " + sinEmpresa.length + " registro(s) asignados a '" + trabajoSeleccionado + "'";
+            setTimeout(() => { mensaje.textContent = ""; }, 2500);
+        }
+    );
+});
+
 // Botón eliminar trabajo
 const botonEliminarTrabajo = document.getElementById("botonEliminarTrabajo");
 
