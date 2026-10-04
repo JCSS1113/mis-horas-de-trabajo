@@ -795,14 +795,53 @@ botonNuevoTrabajo.addEventListener("click", () => {
                 Modal.alert("El nombre no puede estar vacío.", "Error");
                 return;
             }
+
+            // Verificar si ya existe
+            const trabajosExistentes = Array.from(selectTrabajo.options).map(o => o.value.toLowerCase());
+            if (trabajosExistentes.includes(nombreTrim.toLowerCase())) {
+                Modal.alert("Ya existe un trabajo con ese nombre.", "Nombre duplicado");
+                return;
+            }
+
+            // Agregar al select y seleccionarlo
+            const opcion = document.createElement("option");
+            opcion.value = nombreTrim;
+            opcion.textContent = nombreTrim;
+            selectTrabajo.appendChild(opcion);
             selectTrabajo.value = nombreTrim;
-            actualizarListaTrabajos();
-            selectTrabajo.value = nombreTrim;
+            actualizarEmpresaActual();
             mostrarRegistros();
             mensaje.textContent = "✅ Trabajo '" + nombreTrim + "' añadido";
             setTimeout(() => { mensaje.textContent = ""; }, 2500);
         }
     });
+});
+
+// Botón eliminar trabajo
+const botonEliminarTrabajo = document.getElementById("botonEliminarTrabajo");
+
+botonEliminarTrabajo.addEventListener("click", () => {
+    const trabajoSeleccionado = selectTrabajo.value;
+
+    if (trabajoSeleccionado === "") {
+        Modal.alert("Selecciona un trabajo para eliminar.", "Sin selección");
+        return;
+    }
+
+    Modal.confirm(
+        "¿Seguro que quieres eliminar '" + trabajoSeleccionado + "'? Se eliminarán todos sus registros.",
+        "Eliminar trabajo",
+        () => {
+            registros = registros.filter(r => r.trabajo !== trabajoSeleccionado);
+            guardarRegistros();
+            actualizarListaTrabajos();
+            actualizarListaMeses();
+            actualizarEmpresaActual();
+            mostrarRegistros();
+            mensaje.textContent = "🗑️ Trabajo '" + trabajoSeleccionado + "' eliminado";
+            setTimeout(() => { mensaje.textContent = ""; }, 2500);
+        }
+    );
 });
 
 

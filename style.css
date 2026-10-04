@@ -67,6 +67,24 @@ h1 {
     box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
+#botonEliminarTrabajo {
+    padding: 11px 14px;
+    border: none;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#botonEliminarTrabajo:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
 .campo {
     display: flex;
     flex-direction: column;
