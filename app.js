@@ -764,7 +764,21 @@ function actualizarListaTrabajos() {
     }
 }
 
-selectTrabajo.addEventListener("change", () => mostrarRegistros());
+const empresaActual = document.getElementById("empresaActual");
+
+function actualizarEmpresaActual() {
+    const trabajoSeleccionado = selectTrabajo.value;
+    if (trabajoSeleccionado === "") {
+        empresaActual.textContent = "Todos los trabajos";
+    } else {
+        empresaActual.textContent = "🏢 " + trabajoSeleccionado;
+    }
+}
+
+selectTrabajo.addEventListener("change", () => {
+    actualizarEmpresaActual();
+    mostrarRegistros();
+});
 
 const botonNuevoTrabajo = document.getElementById("botonNuevoTrabajo");
 
@@ -798,4 +812,5 @@ botonNuevoTrabajo.addEventListener("click", () => {
 
 actualizarListaMeses();
 actualizarListaTrabajos();
+actualizarEmpresaActual();
 mostrarRegistros();
