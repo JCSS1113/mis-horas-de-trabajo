@@ -471,6 +471,11 @@ function actualizarBotonReloj() {
 }
 
 botonReloj.addEventListener("click", () => {
+    if (selectTrabajo.value === "") {
+        Modal.alert("Debes seleccionar una empresa/trabajo antes de fichar entrada o salida.", "Empresa no seleccionada");
+        return;
+    }
+
     if (!trabajando) {
         // Fichar entrada
         horaEntrada = new Date();
