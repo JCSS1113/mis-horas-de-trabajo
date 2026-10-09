@@ -373,7 +373,12 @@ function editarRegistro(registro) {
 // ================================
 
 function existeOtraFecha(fecha) {
-    return registros.some(r => r.fecha === fecha && r !== registroEditando);
+    const trabajoActual = selectTrabajo.value;
+    return registros.some(r =>
+        r.fecha === fecha &&
+        r !== registroEditando &&
+        (r.trabajo || "") === trabajoActual
+    );
 }
 
 botonAgregar.addEventListener("click", () => {
@@ -500,19 +505,23 @@ botonReloj.addEventListener("click", () => {
         const totalDia = (diffMinutos / 60) * pagoNumero;
 
         // Verificar si ya existe registro para hoy
+        const trabajoActual = selectTrabajo.value;
+
         if (existeOtraFecha(fechaHoy)) {
             Modal.confirm("Ya existe un registro para hoy. ¿Quieres añadir estas horas igualmente?", "Registro duplicado", () => {
-                registros.push({ fecha: fechaHoy, horas: horasTexto, pago: pagoNumero, total: totalDia });
+                registros.push({ fecha: fechaHoy, horas: horasTexto, pago: pagoNumero, total: totalDia, trabajo: trabajoActual });
                 guardarRegistros();
                 actualizarListaMeses();
+                actualizarListaTrabajos();
                 mostrarRegistros();
                 mensaje.textContent = "🌙 ¡ooo que no sea un adios definitivo! Salida registrada: " + horasTexto + " trabajadas";
                 setTimeout(() => { mensaje.textContent = ""; }, 2500);
             });
         } else {
-            registros.push({ fecha: fechaHoy, horas: horasTexto, pago: pagoNumero, total: totalDia });
+            registros.push({ fecha: fechaHoy, horas: horasTexto, pago: pagoNumero, total: totalDia, trabajo: trabajoActual });
             guardarRegistros();
             actualizarListaMeses();
+            actualizarListaTrabajos();
             mostrarRegistros();
             mensaje.textContent = "✅ Salida registrada: " + horasTexto + " trabajadas";
             setTimeout(() => { mensaje.textContent = ""; }, 2500);
