@@ -397,7 +397,16 @@ botonAgregar.addEventListener("click", () => {
     const pagoNumero = Number(pago);
     if (isNaN(pagoNumero) || pagoNumero < 0) { Modal.alert("El pago por hora no es válido.", "Pago inválido"); return; }
 
-    if (existeOtraFecha(fecha)) { Modal.alert("Ya existe un registro para esa fecha.", "Fecha duplicada"); return; }
+    if (selectTrabajo.value === "") {
+        if (registroEditando !== null) {
+            Modal.alert("Selecciona una empresa para guardar los cambios. Si no tienes ninguna, créala con el botón ➕.", "Empresa requerida");
+        } else {
+            Modal.alert("Selecciona una empresa existente o crea una nueva con el botón ➕ antes de agregar el registro.", "Empresa requerida");
+        }
+        return;
+    }
+
+    if (existeOtraFecha(fecha)) { Modal.alert("Ya existe un registro para esa fecha y empresa.", "Fecha duplicada"); return; }
 
     const totalDia = horasDecimales * pagoNumero;
 
