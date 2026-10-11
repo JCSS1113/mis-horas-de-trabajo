@@ -54,6 +54,9 @@ const Traducciones = {
         colPago: "Pago/hora",
         colTotal: "Total",
         colAcciones: "Acciones",
+        colEstado: "Estado",
+        estadoCobrado: "✅ Cobrado",
+        estadoPendiente: "⏳ Pendiente",
         btnEditar: "✏️ Editar",
         btnEliminar: "🗑️ Eliminar",
         // Días
@@ -154,6 +157,9 @@ const Traducciones = {
         colPago: "Pay/hour",
         colTotal: "Total",
         colAcciones: "Actions",
+        colEstado: "Status",
+        estadoCobrado: "✅ Paid",
+        estadoPendiente: "⏳ Pending",
         btnEditar: "✏️ Edit",
         btnEliminar: "🗑️ Delete",
         dias: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
@@ -428,6 +434,8 @@ const tablaRegistros = document.getElementById("tablaRegistros");
 const totalGeneral = document.getElementById("totalGeneral");
 const totalHoras = document.getElementById("totalHoras");
 const totalDias = document.getElementById("totalDias");
+const totalCobrado = document.getElementById("totalCobrado");
+const totalPendiente = document.getElementById("totalPendiente");
 const filtroMes = document.getElementById("filtroMes");
 const mensaje = document.getElementById("mensaje");
 
@@ -494,7 +502,17 @@ function mostrarRegistros() {
         const celdaTotal = document.createElement("td");
         celdaTotal.textContent = registro.total.toFixed(2) + " €";
 
+        const celdaEstado = document.createElement("td");
+        const estaCobrado = registro.cobrado === true;
+        celdaEstado.textContent = estaCobrado ? t("estadoCobrado") : t("estadoPendiente");
+
         const celdaAccion = document.createElement("td");
+
+        const botonCobrar = document.createElement("button");
+        botonCobrar.textContent = estaCobrado ? "⏳" : "💰";
+        botonCobrar.className = "boton-editar";
+        botonCobrar.title = estaCobrado ? "Marcar como pendiente" : "Marcar como cobrado";
+        botonCobrar.addEventListener("click", () => alternarCobro(registro));
 
         const botonEditar = document.createElement("button");
         botonEditar.textContent = t("btnEditar");
@@ -508,6 +526,7 @@ function mostrarRegistros() {
         botonEliminar.setAttribute("aria-label", "Eliminar registro del " + registro.fecha);
         botonEliminar.addEventListener("click", () => eliminarRegistro(registro));
 
+        celdaAccion.appendChild(botonCobrar);
         celdaAccion.appendChild(botonEditar);
         celdaAccion.appendChild(botonEliminar);
 
@@ -517,6 +536,7 @@ function mostrarRegistros() {
         fila.appendChild(celdaHoras);
         fila.appendChild(celdaPago);
         fila.appendChild(celdaTotal);
+        fila.appendChild(celdaEstado);
         fila.appendChild(celdaAccion);
 
         tablaRegistros.appendChild(fila);
@@ -541,16 +561,32 @@ function actualizarResumen() {
 
     let minutosTotales = 0;
     let dineroTotal = 0;
+    let dineroCobrado = 0;
+    let dineroPendiente = 0;
 
     for (const registro of registrosMostrar) {
         const minutos = Utilidades.convertirAMinutos(registro.horas);
         if (!isNaN(minutos)) minutosTotales += minutos;
         dineroTotal += registro.total;
+
+        if (registro.cobrado === true) {
+            dineroCobrado += registro.total;
+        } else {
+            dineroPendiente += registro.total;
+        }
     }
 
     totalHoras.textContent = Utilidades.formatoHoras(minutosTotales);
     totalGeneral.textContent = dineroTotal.toFixed(2);
     totalDias.textContent = registrosMostrar.length;
+    totalCobrado.textContent = dineroCobrado.toFixed(2);
+    totalPendiente.textContent = dineroPendiente.toFixed(2);
+}
+
+function alternarCobro(registro) {
+    registro.cobrado = !(registro.cobrado === true);
+    guardarRegistros();
+    mostrarRegistros();
 }
 
 function eliminarRegistro(registro) {
@@ -815,6 +851,7 @@ function copiaValida(datos) {
         if (typeof registro.pago !== "number" || !Number.isFinite(registro.pago) || registro.pago < 0) return false;
         if (typeof registro.total !== "number" || !Number.isFinite(registro.total) || registro.total < 0) return false;
         if (registro.trabajo !== undefined && typeof registro.trabajo !== "string") return false;
+        if (registro.cobrado !== undefined && typeof registro.cobrado !== "boolean") return false;
     }
     return true;
 }
@@ -896,7 +933,7 @@ botonExcel.addEventListener("click", () => {
     const totalHoras = horasTotales + ":" + String(minutosRestantes).padStart(2, "0");
 
     const datosExcel = [];
-    datosExcel.push([t("colDia"), t("colFecha"), t("colTrabajo"), t("colHoras"), t("colPago") + " (€)", t("colTotal") + " (€)"]);
+    datosExcel.push([t("colDia"), t("colFecha"), t("colTrabajo"), t("colHoras"), t("colPago") + " (€)", t("colTotal") + " (€)", t("colEstado")]);
 
     registrosExportar.forEach((registro) => {
         datosExcel.push([
@@ -905,7 +942,8 @@ botonExcel.addEventListener("click", () => {
             registro.trabajo || "",
             registro.horas,
             Number(registro.pago),
-            Number(registro.total)
+            Number(registro.total),
+            registro.cobrado === true ? "Cobrado" : "Pendiente"
         ]);
     });
 
@@ -1184,14 +1222,15 @@ function aplicarIdioma() {
 
     // Cabecera tabla
     const ths = document.querySelectorAll("thead th");
-    if (ths.length >= 7) {
+    if (ths.length >= 8) {
         ths[0].textContent = t("colDia");
         ths[1].textContent = t("colFecha");
         ths[2].textContent = t("colTrabajo");
         ths[3].textContent = t("colHoras");
         ths[4].textContent = t("colPago");
         ths[5].textContent = t("colTotal");
-        ths[6].textContent = t("colAcciones");
+        ths[6].textContent = t("colEstado");
+        ths[7].textContent = t("colAcciones");
     }
 
     // Regenerar listas dinámicas
