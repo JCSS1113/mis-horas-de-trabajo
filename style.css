@@ -4,32 +4,39 @@
 
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    color: #222;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #e8ecf1 0%, #f0f4f8 50%, #e2e8f0 100%);
+    color: #1e293b;
+    line-height: 1.6;
+    min-height: 100vh;
 }
 
 .contenedor {
-    width: 95%;
-    max-width: 1100px;
-    margin: 30px auto;
+    width: 92%;
+    max-width: 1000px;
+    margin: 40px auto;
 }
 
 h1 {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 35px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+    letter-spacing: -0.5px;
 }
 
 /* FORMULARIO */
 .formulario {
     background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    padding: 28px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
+    gap: 18px;
     align-items: end;
+    border: 1px solid rgba(255,255,255,0.8);
 }
 
 .campo-trabajo {
@@ -43,22 +50,32 @@ h1 {
 
 .trabajo-selector select {
     flex: 1;
-    padding: 11px;
-    border: 1px solid #ccc;
-    border-radius: 7px;
+    padding: 12px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
     font-size: 15px;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+}
+
+.trabajo-selector select:focus {
+    outline: none;
+    border-color: #6366f1;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 #botonNuevoTrabajo {
-    padding: 11px 14px;
+    padding: 12px 16px;
     border: none;
-    border-radius: 7px;
+    border-radius: 10px;
     background: linear-gradient(135deg, #f59e0b, #d97706);
     color: white;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
 }
 
 #botonNuevoTrabajo:hover {
@@ -68,15 +85,16 @@ h1 {
 }
 
 #botonAsignarTrabajo {
-    padding: 11px 14px;
+    padding: 12px 16px;
     border: none;
-    border-radius: 7px;
+    border-radius: 10px;
     background: linear-gradient(135deg, #10b981, #059669);
     color: white;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
 }
 
 #botonAsignarTrabajo:hover {
@@ -86,15 +104,16 @@ h1 {
 }
 
 #botonEliminarTrabajo {
-    padding: 11px 14px;
+    padding: 12px 16px;
     border: none;
-    border-radius: 7px;
+    border-radius: 10px;
     background: linear-gradient(135deg, #ef4444, #dc2626);
     color: white;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
 }
 
 #botonEliminarTrabajo:hover {
@@ -106,31 +125,62 @@ h1 {
 .campo {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 7px;
 }
 
 .campo label {
-    font-weight: bold;
-    font-size: 14px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .campo input {
-    padding: 11px;
-    border: 1px solid #ccc;
-    border-radius: 7px;
+    padding: 12px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
     font-size: 15px;
+    transition: all 0.2s ease;
+    background: #f8fafc;
+}
+
+.campo input:focus {
+    outline: none;
+    border-color: #6366f1;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.trabajo-selector select {
+    flex: 1;
+    padding: 12px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 15px;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+}
+
+.trabajo-selector select:focus {
+    outline: none;
+    border-color: #6366f1;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 #botonAgregar {
-    padding: 11px;
+    padding: 12px 20px;
     border: none;
-    border-radius: 7px;
+    border-radius: 10px;
     background: linear-gradient(135deg, #10b981, #059669);
     color: white;
     font-size: 15px;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+    height: fit-content;
 }
 
 #botonAgregar:hover {
@@ -142,13 +192,15 @@ h1 {
 /* EMPRESA ACTUAL */
 .empresa-actual {
     text-align: center;
-    padding: 10px 20px;
-    margin: 15px 0;
+    padding: 12px 24px;
+    margin: 20px 0;
     background: linear-gradient(135deg, #6366f1, #4f46e5);
     color: white;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: bold;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
 
 .empresa-actual:empty {
@@ -163,56 +215,83 @@ body.modo-oscuro .empresa-actual {
 .resumen {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
+    gap: 18px;
     margin: 25px 0;
 }
 
 .tarjeta {
     background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
     text-align: center;
+    border: 1px solid rgba(255,255,255,0.8);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tarjeta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
 }
 
 .tarjeta h3 {
-    margin: 0 0 10px;
-    font-size: 15px;
-    color: #666;
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
 }
 
 .tarjeta p {
     margin: 0;
-    font-size: 28px;
-    font-weight: bold;
+    font-size: 32px;
+    font-weight: 700;
+    color: #1e293b;
 }
 
 /* FILTRO */
 .filtro {
     background: white;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    padding: 18px 22px;
+    border-radius: 14px;
+    margin-bottom: 22px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+    border: 1px solid rgba(255,255,255,0.8);
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .filtro label {
-    font-weight: bold;
-    margin-right: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #475569;
 }
 
 .filtro select {
-    padding: 9px;
-    border-radius: 7px;
-    border: 1px solid #ccc;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 2px solid #e2e8f0;
+    font-size: 14px;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filtro select:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 /* TABLA */
 .tabla-contenedor {
     background: white;
-    border-radius: 12px;
+    border-radius: 16px;
     overflow-x: auto;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+    border: 1px solid rgba(255,255,255,0.8);
 }
 
 table {
@@ -222,13 +301,22 @@ table {
 }
 
 th, td {
-    padding: 13px;
+    padding: 14px 16px;
     text-align: center;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 th {
-    background: #f1f5f9;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #475569;
+}
+
+tr {
+    transition: background 0.15s ease;
 }
 
 tr:hover {
@@ -236,30 +324,40 @@ tr:hover {
 }
 
 .boton-editar {
-    background: #f59e0b;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
     color: white;
     border: none;
-    padding: 7px 10px;
-    border-radius: 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
     cursor: pointer;
-    margin-right: 5px;
+    margin-right: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2);
 }
 
 .boton-eliminar {
-    background: #dc2626;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
     color: white;
     border: none;
-    padding: 7px 10px;
-    border-radius: 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
     cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
 }
 
 .boton-editar:hover {
-    background: #d97706;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
 .boton-eliminar:hover {
-    background: #b91c1c;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 /* VERSIÓN */
@@ -277,21 +375,23 @@ body.modo-oscuro .version {
 /* ENTRADA / SALIDA */
 .reloj {
     background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
     text-align: center;
-    margin: 20px 0;
+    margin: 22px 0;
+    border: 1px solid rgba(255,255,255,0.8);
 }
 
 #botonReloj {
-    padding: 14px 30px;
+    padding: 14px 36px;
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    letter-spacing: 0.3px;
 }
 
 .boton-entrada {
@@ -315,29 +415,32 @@ body.modo-oscuro .version {
 }
 
 #estadoReloj {
-    margin: 12px 0 0;
+    margin: 14px 0 0;
     font-size: 14px;
-    color: #666;
+    color: #64748b;
+    font-weight: 500;
 }
 
 /* MENSAJE */
 #mensaje {
     text-align: center;
-    margin: 20px 0;
-    font-weight: bold;
-    min-height: 20px;
+    margin: 22px 0;
+    font-weight: 600;
+    min-height: 24px;
+    font-size: 15px;
 }
 
 /* BOTONES DE COPIA Y EXCEL */
 #botonCopia, #botonRestaurar, #botonExcel {
-    padding: 10px 14px;
+    padding: 12px 18px;
     border: none;
-    border-radius: 7px;
+    border-radius: 10px;
     color: white;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
-    margin-right: 5px;
+    margin-right: 8px;
+    transition: all 0.2s ease;
 }
 
 #botonCopia {
@@ -463,13 +566,13 @@ body.modo-oscuro .version {
 @media (max-width: 750px) {
     .contenedor {
         width: 95%;
-        margin: 15px auto;
+        margin: 20px auto;
     }
 
     .formulario {
         grid-template-columns: 1fr;
-        gap: 10px;
-        padding: 15px;
+        gap: 14px;
+        padding: 20px;
     }
 
     .campo-trabajo {
@@ -482,46 +585,50 @@ body.modo-oscuro .version {
 
     .resumen {
         grid-template-columns: 1fr;
-        gap: 10px;
-        margin: 15px 0;
+        gap: 14px;
+        margin: 18px 0;
     }
 
     .tarjeta {
-        padding: 15px;
+        padding: 20px;
     }
 
     .tarjeta p {
-        font-size: 22px;
+        font-size: 26px;
     }
 
     h1 {
-        font-size: 22px;
-        margin-bottom: 20px;
+        font-size: 24px;
+        margin-bottom: 25px;
     }
 
     #botonCopia, #botonRestaurar, #botonExcel {
         width: 100%;
-        margin-top: 5px;
+        margin-top: 8px;
         margin-right: 0;
+        padding: 14px;
+        font-size: 15px;
     }
 
     .reloj {
-        padding: 15px;
-        margin: 15px 0;
+        padding: 20px;
+        margin: 18px 0;
     }
 
     #botonReloj {
         width: 100%;
-        padding: 12px 20px;
+        padding: 14px 20px;
     }
 
     .filtro {
-        padding: 12px;
+        padding: 14px;
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .filtro select {
         width: 100%;
-        margin-top: 8px;
+        margin-top: 4px;
     }
 
     table {
@@ -530,20 +637,29 @@ body.modo-oscuro .version {
     }
 
     th, td {
-        padding: 8px;
+        padding: 10px 8px;
     }
 
     .boton-editar, .boton-eliminar {
-        padding: 5px 8px;
+        padding: 6px 10px;
         font-size: 12px;
+        margin-right: 4px;
     }
 
     #botonTema {
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
-        top: 10px;
-        right: 10px;
+        width: 42px;
+        height: 42px;
+        font-size: 20px;
+        top: 12px;
+        right: 12px;
+    }
+
+    #botonIdioma {
+        width: 50px;
+        height: 42px;
+        font-size: 13px;
+        top: 62px;
+        right: 12px;
     }
 }
 
@@ -609,8 +725,8 @@ body.modo-oscuro #botonIdioma {
    MODO OSCURO (mejorado)
    =============================== */
 body.modo-oscuro {
-    background: #0f0f0f;
-    color: #f0f0f0;
+    background: linear-gradient(135deg, #0a0a0a 0%, #111827 50%, #0f172a 100%);
+    color: #e2e8f0;
 }
 
 body.modo-oscuro h1 {
@@ -618,29 +734,48 @@ body.modo-oscuro h1 {
 }
 
 body.modo-oscuro .formulario {
-    background: #1a1a1a;
+    background: #1e293b;
+    border-color: #334155;
 }
 
 body.modo-oscuro .campo label {
-    color: #f0f0f0;
+    color: #94a3b8;
 }
 
 body.modo-oscuro .campo input {
-    background: #2a2a2a;
+    background: #0f172a;
     color: #ffffff;
-    border-color: #555;
+    border-color: #475569;
+}
+
+body.modo-oscuro .campo input:focus {
+    border-color: #818cf8;
+    background: #1e293b;
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
 }
 
 body.modo-oscuro .campo input::placeholder {
-    color: #999;
+    color: #64748b;
+}
+
+body.modo-oscuro .trabajo-selector select {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: #475569;
+}
+
+body.modo-oscuro .trabajo-selector select:focus {
+    border-color: #818cf8;
+    background: #1e293b;
 }
 
 body.modo-oscuro .tarjeta {
-    background: #1a1a1a;
+    background: #1e293b;
+    border-color: #334155;
 }
 
 body.modo-oscuro .tarjeta h3 {
-    color: #cccccc;
+    color: #94a3b8;
 }
 
 body.modo-oscuro .tarjeta p {
@@ -648,47 +783,50 @@ body.modo-oscuro .tarjeta p {
 }
 
 body.modo-oscuro .filtro {
-    background: #1a1a1a;
+    background: #1e293b;
+    border-color: #334155;
 }
 
 body.modo-oscuro .filtro label {
-    color: #f0f0f0;
+    color: #94a3b8;
 }
 
 body.modo-oscuro .filtro select {
-    background: #2a2a2a;
+    background: #0f172a;
     color: #ffffff;
-    border-color: #555;
+    border-color: #475569;
 }
 
 body.modo-oscuro .tabla-contenedor {
-    background: #1a1a1a;
+    background: #1e293b;
+    border-color: #334155;
 }
 
 body.modo-oscuro table {
-    color: #f0f0f0;
+    color: #e2e8f0;
 }
 
 body.modo-oscuro th {
-    background: #252525;
-    color: #ffffff;
+    background: linear-gradient(135deg, #1e293b, #334155);
+    color: #e2e8f0;
 }
 
 body.modo-oscuro td {
-    color: #f0f0f0;
-    border-bottom-color: #333;
+    color: #e2e8f0;
+    border-bottom-color: #334155;
 }
 
 body.modo-oscuro tr:hover {
-    background: #222;
+    background: #334155;
 }
 
 body.modo-oscuro .reloj {
-    background: #1a1a1a;
+    background: #1e293b;
+    border-color: #334155;
 }
 
 body.modo-oscuro #estadoReloj {
-    color: #cccccc;
+    color: #94a3b8;
 }
 
 body.modo-oscuro #mensaje {
@@ -732,13 +870,19 @@ body.modo-oscuro #botonExcel:hover {
 }
 
 body.modo-oscuro #botonTema {
-    background: #2a2a2a;
+    background: #334155;
+    color: #ffffff;
+}
+
+body.modo-oscuro #botonIdioma {
+    background: #334155;
     color: #ffffff;
 }
 
 /* Modal en modo oscuro */
 body.modo-oscuro .modal {
-    background: #1a1a1a;
+    background: #1e293b;
+    border: 1px solid #334155;
 }
 
 body.modo-oscuro .modal-titulo {
@@ -746,11 +890,16 @@ body.modo-oscuro .modal-titulo {
 }
 
 body.modo-oscuro .modal-mensaje {
-    color: #cccccc;
+    color: #cbd5e1;
 }
 
 body.modo-oscuro .modal-input {
-    background: #2a2a2a;
+    background: #0f172a;
     color: #ffffff;
-    border-color: #555;
+    border-color: #475569;
+}
+
+body.modo-oscuro .modal-boton-cancelar {
+    background: #475569;
+    color: #e2e8f0;
 }
