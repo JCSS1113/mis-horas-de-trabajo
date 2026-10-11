@@ -574,6 +574,38 @@ body.modo-oscuro .version {
 }
 
 /* ===============================
+   BOTÓN IDIOMA
+   =============================== */
+#botonIdioma {
+    position: fixed;
+    top: 75px;
+    right: 20px;
+    width: 55px;
+    height: 45px;
+    border: none;
+    border-radius: 22px;
+    background: white;
+    color: #333;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+#botonIdioma:hover {
+    transform: scale(1.08);
+}
+
+body.modo-oscuro #botonIdioma {
+    background: #2a2a2a;
+    color: #f0f0f0;
+}
+
+/* ===============================
    MODO OSCURO (mejorado)
    =============================== */
 body.modo-oscuro {
