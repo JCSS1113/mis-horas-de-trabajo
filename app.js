@@ -664,12 +664,25 @@ archivoRestaurar.addEventListener("change", () => {
 const botonExcel = document.getElementById("botonExcel");
 
 botonExcel.addEventListener("click", () => {
-    if (registros.length === 0) { Modal.alert("No hay registros para exportar.", "Sin datos"); return; }
+    // Filtrar por empresa seleccionada (si hay alguna)
+    const trabajoSeleccionado = selectTrabajo.value;
+    let registrosExportar = registros;
+
+    if (trabajoSeleccionado !== "") {
+        registrosExportar = registros.filter(r => (r.trabajo || "") === trabajoSeleccionado);
+    }
+
+    if (registrosExportar.length === 0) {
+        Modal.alert(trabajoSeleccionado !== ""
+            ? "No hay registros para la empresa '" + trabajoSeleccionado + "'."
+            : "No hay registros para exportar.", "Sin datos");
+        return;
+    }
 
     let totalDinero = 0;
     let totalMinutos = 0;
 
-    registros.forEach((registro) => {
+    registrosExportar.forEach((registro) => {
         totalDinero += Number(registro.total);
         const minutos = Utilidades.convertirAMinutos(registro.horas);
         if (!isNaN(minutos)) totalMinutos += minutos;
@@ -682,7 +695,7 @@ botonExcel.addEventListener("click", () => {
     const datosExcel = [];
     datosExcel.push(["Día", "Fecha", "Trabajo", "Horas", "Pago por hora (€)", "Total (€)"]);
 
-    registros.forEach((registro) => {
+    registrosExportar.forEach((registro) => {
         datosExcel.push([
             Utilidades.obtenerNombreDia(registro.fecha),
             registro.fecha,
@@ -699,19 +712,24 @@ botonExcel.addEventListener("click", () => {
 
     const hoja = XLSX.utils.aoa_to_sheet(datosExcel);
     const libro = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(libro, hoja, "Horas de trabajo");
+    const nombreHoja = trabajoSeleccionado !== "" ? trabajoSeleccionado : "Horas de trabajo";
+    XLSX.utils.book_append_sheet(libro, hoja, nombreHoja);
 
     hoja["!cols"] = [{ wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 20 }, { wch: 18 }];
 
-    for (let fila = 2; fila <= registros.length + 1; fila++) {
+    for (let fila = 2; fila <= registrosExportar.length + 1; fila++) {
         if (hoja[`D${fila}`]) hoja[`D${fila}`].z = '0.00" €"';
         if (hoja[`E${fila}`]) hoja[`E${fila}`].z = '0.00" €"';
     }
 
-    const filaTotalDinero = registros.length + 4;
+    const filaTotalDinero = registrosExportar.length + 4;
     if (hoja[`E${filaTotalDinero}`]) hoja[`E${filaTotalDinero}`].z = '0.00" €"';
 
-    XLSX.writeFile(libro, "horas-de-trabajo.xlsx");
+    const nombreArchivo = trabajoSeleccionado !== ""
+        ? "horas-" + trabajoSeleccionado.toLowerCase().replace(/\s+/g, "-") + ".xlsx"
+        : "horas-de-trabajo.xlsx";
+
+    XLSX.writeFile(libro, nombreArchivo);
 });
 
 
